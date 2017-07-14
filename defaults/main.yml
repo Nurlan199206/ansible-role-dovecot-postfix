@@ -1,0 +1,49 @@
+---
+# defaults file for ansible-role-dovecot-postfix
+postfix_main_cf:
+  compatibility_level: 2
+  smtpd_sasl_auth_enable: "yes"
+  smtpd_sasl_type: "dovecot"
+  smtpd_sasl_path: "private/auth"
+  smtpd_sasl_security_options: "noanonymous"
+  smtpd_tls_security_level: "may"
+  home_mailbox: "Maildir/"
+  virtual_alias_maps: "hash:/etc/postfix/virtual" # see postfix_catch_all
+
+postfix_alias_root: "admin@example.com"
+
+postfix_uncomment_master_cf:
+- "submission "
+- "  -o syslog_name=postfix/submission"
+- "  -o smtpd_tls_security_level=encrypt"
+- "  -o smtpd_sasl_auth_enable=yes"
+- "  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject"
+- "  -o milter_macro_daemon_name=ORIGINATING"
+- "smtps "
+- "  -o syslog_name=postfix/smtps"
+- "  -o smtpd_tls_wrappermode=yes"
+- "  -o smtpd_sasl_auth_enable=yes"
+- "  -o smtpd_relay_restrictions=permit_sasl_authenticated,reject"
+- "  -o milter_macro_daemon_name=ORIGINATING"
+
+postfix_smtpd_tls_cert_file: ""
+postfix_smtpd_tls_key_file: ""
+dovecot_ssl_cert: ""
+dovecot_ssl_key: ""
+
+postfix_catch_all:
+- virtual_regexp:  '^@example\.com '
+  virtual_line: '@example.com vagrant+example.com'
+  forward_path: '/home/vagrant/.forward+example.com'
+  forward_content: '~/Maildir/.example.com/'
+- virtual_regexp:  '^@example\.org '
+  virtual_line: '@example.org vagrant+example.org'
+  forward_path: '/home/vagrant/.forward+example.org'
+  forward_content: '~/Maildir/.example.org/'
+
+dovecot_ufw_allow_ports:
+- 993
+postfix_ufw_allow_ports:
+- 25
+- 465
+- 587

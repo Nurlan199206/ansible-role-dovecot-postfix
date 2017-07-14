@@ -1,0 +1,120 @@
+---
+# tasks file for ansible-role-dovecot-postfix
+- name: "Install dovecot-imapd"
+  apt:
+    name: dovecot-imapd
+    install_recommends: no
+- name: "Install postfix"
+  apt:
+    name: postfix
+
+- name: "Update /etc/postfix/main.cf"
+  lineinfile:
+    path: "/etc/postfix/main.cf"
+    regexp: "^{{ item.key }} ="
+    line: "{{ item.key }} = {{ item.value }}"
+  with_dict: "{{ postfix_main_cf }}"
+  notify: reload postfix
+- name: "Update smtpd_tls_cert_file"
+  lineinfile:
+    path: "/etc/postfix/main.cf"
+    regexp: "^smtpd_tls_cert_file="
+    line: "smtpd_tls_cert_file={{ postfix_smtpd_tls_cert_file }}"
+  notify: reload postfix
+  when: 'postfix_smtpd_tls_cert_file != ""'
+- name: "Update smtpd_tls_key_file"
+  lineinfile:
+    path: "/etc/postfix/main.cf"
+    regexp: "^smtpd_tls_key_file="
+    line: "smtpd_tls_key_file={{ postfix_smtpd_tls_key_file }}"
+  notify: reload postfix
+  when: 'postfix_smtpd_tls_key_file != ""'
+
+- name: "Uncomment /etc/postfix/master.cf"
+  lineinfile:
+    path: "/etc/postfix/master.cf"
+    regexp: "^#({{ item }}.*)"
+    line: '\1'
+    backrefs: yes
+  with_items: "{{ postfix_uncomment_master_cf }}"
+  notify: reload postfix
+
+- name: "Update alias of root"
+  lineinfile:
+    path: "/etc/aliases"
+    regexp: "^root:"
+    line: "root: {{ postfix_alias_root }}"
+  notify: newaliases
+
+- name: "Set dovecot mail_location to Maildir"
+  lineinfile:
+    path: "/etc/dovecot/conf.d/10-mail.conf"
+    regexp: "^mail_location = "
+    line: "mail_location = maildir:~/Maildir"
+  notify: reload dovecot
+- name: "Set dovecot unix_listener for postfix auth"
+  replace:
+    path: "/etc/dovecot/conf.d/10-master.conf"
+    regexp: "^  #?unix_listener /var/spool/postfix/private/auth {[^{}]*}$"
+    replace: "  unix_listener /var/spool/postfix/private/auth {\n    mode = 0660\n    user = postfix\n    group = postfix\n  }"
+  notify: reload dovecot
+- name: "Update dovecot ssl_cert"
+  lineinfile:
+    path: "/etc/dovecot/conf.d/10-ssl.conf"
+    regexp: "^ssl_cert = <"
+    line: "ssl_cert = <{{ dovecot_ssl_cert }}"
+  notify: reload dovecot
+  when: 'dovecot_ssl_cert != ""'
+- name: "Update dovecot ssl_key"
+  lineinfile:
+    path: "/etc/dovecot/conf.d/10-ssl.conf"
+    regexp: "^ssl_key = <"
+    line: "ssl_key = <{{ dovecot_ssl_key }}"
+  notify: reload dovecot
+  when: 'dovecot_ssl_key != ""'
+- name: "Set dovecot ssl_protocols"
+  lineinfile:
+    path: "/etc/dovecot/conf.d/10-ssl.conf"
+    regexp: "^#?ssl_protocols ="
+    line: "ssl_protocols = !SSLv2 !SSLv3"
+  notify: reload dovecot
+- name: "Set dovecot ssl"
+  lineinfile:
+    path: "/etc/dovecot/conf.d/10-ssl.conf"
+    regexp: "^#?ssl ="
+    line: "ssl = yes"
+  notify: reload dovecot
+- name: "Allow dovecot login auth"
+  lineinfile:
+    path: "/etc/dovecot/conf.d/10-auth.conf"
+    regexp: "^#?auth_mechanisms ="
+    line: "auth_mechanisms = plain login"
+  notify: reload dovecot
+
+- name: "Set /etc/postfix/virtual"
+  lineinfile:
+    path: "/etc/postfix/virtual"
+    regexp: "{{ item.virtual_regexp }}"
+    line: "{{ item.virtual_line }}"
+    create: yes
+  with_items: "{{ postfix_catch_all }}"
+  notify: postmap virtual
+- name: "Create .forward"
+  lineinfile:
+    path: "{{ item.forward_path }}"
+    line: "{{ item.forward_content }}"
+    create: yes
+  with_items: "{{ postfix_catch_all }}"
+
+- name: Allow tcp to dovecot
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  with_items: "{{ dovecot_ufw_allow_ports }}"
+- name: Allow tcp to postfix
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  with_items: "{{ postfix_ufw_allow_ports }}"

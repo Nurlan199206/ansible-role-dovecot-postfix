@@ -1,0 +1,12 @@
+---
+# handlers file for ansible-role-dovecot-postfix
+- name: reload postfix
+  service: name=postfix state=reloaded
+- name: newaliases
+  command: newaliases
+- name: reload dovecot
+  systemd:
+    name: dovecot
+    state: reloaded
+- name: postmap virtual
+  command: postmap /etc/postfix/virtual
