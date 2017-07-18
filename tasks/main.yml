@@ -111,6 +111,9 @@
   lineinfile:
     path: "{{ item.forward_path }}"
     line: "{{ item.forward_content }}"
+    owner: "{{ item.forward_owner }}"
+    group: "{{ item.forward_group }}"
+    mode: "{{ item.forward_mode }}"
     create: yes
   with_items: "{{ postfix_catch_all }}"
 

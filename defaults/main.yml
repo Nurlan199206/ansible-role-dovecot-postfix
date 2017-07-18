@@ -38,10 +38,16 @@ postfix_catch_all:
   virtual_line: '@example.com vagrant+example.com'
   forward_path: '/home/vagrant/.forward+example.com'
   forward_content: '~/Maildir/.example.com/'
+  forward_owner: 'vagrant'
+  forward_group: 'vagrant'
+  forward_mode: '0444'
 - virtual_regexp:  '^@example\.org '
   virtual_line: '@example.org vagrant+example.org'
   forward_path: '/home/vagrant/.forward+example.org'
   forward_content: '~/Maildir/.example.org/'
+  forward_owner: 'vagrant'
+  forward_group: 'vagrant'
+  forward_mode: '0444'
 
 dovecot_ufw_allow_ports:
 - 993
