@@ -11,7 +11,8 @@ postfix_main_cf:
   virtual_alias_maps: "hash:/etc/postfix/virtual" # see postfix_catch_all
 postfix_main_cf_2: {}
 
-postfix_alias_root: "admin@example.com"
+postfix_aliases:
+  root: "admin@example.com"
 
 postfix_uncomment_master_cf:
 - "submission "
