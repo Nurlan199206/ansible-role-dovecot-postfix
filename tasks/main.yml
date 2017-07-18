@@ -15,6 +15,13 @@
     line: "{{ item.key }} = {{ item.value }}"
   with_dict: "{{ postfix_main_cf }}"
   notify: reload postfix
+- name: "Update /etc/postfix/main.cf"
+  lineinfile:
+    path: "/etc/postfix/main.cf"
+    regexp: "^{{ item.key }} ="
+    line: "{{ item.key }} = {{ item.value }}"
+  with_dict: "{{ postfix_main_cf_2 }}"
+  notify: reload postfix
 - name: "Update smtpd_tls_cert_file"
   lineinfile:
     path: "/etc/postfix/main.cf"

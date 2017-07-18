@@ -9,6 +9,7 @@ postfix_main_cf:
   smtpd_tls_security_level: "may"
   home_mailbox: "Maildir/"
   virtual_alias_maps: "hash:/etc/postfix/virtual" # see postfix_catch_all
+postfix_main_cf_2: {}
 
 postfix_alias_root: "admin@example.com"
 
