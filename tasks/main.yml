@@ -80,12 +80,6 @@
     line: "ssl_key = <{{ dovecot_ssl_key }}"
   notify: reload dovecot
   when: 'dovecot_ssl_key != ""'
-- name: "Set dovecot ssl_protocols"
-  lineinfile:
-    path: "/etc/dovecot/conf.d/10-ssl.conf"
-    regexp: "^#?ssl_protocols ="
-    line: "ssl_protocols = !SSLv2 !SSLv3"
-  notify: reload dovecot
 - name: "Set dovecot ssl"
   lineinfile:
     path: "/etc/dovecot/conf.d/10-ssl.conf"
