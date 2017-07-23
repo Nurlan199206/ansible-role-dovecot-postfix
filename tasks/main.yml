@@ -69,14 +69,14 @@
 - name: "Update dovecot ssl_cert"
   lineinfile:
     path: "/etc/dovecot/conf.d/10-ssl.conf"
-    regexp: "^ssl_cert = <"
+    regexp: "^#?ssl_cert = <"
     line: "ssl_cert = <{{ dovecot_ssl_cert }}"
   notify: reload dovecot
   when: 'dovecot_ssl_cert != ""'
 - name: "Update dovecot ssl_key"
   lineinfile:
     path: "/etc/dovecot/conf.d/10-ssl.conf"
-    regexp: "^ssl_key = <"
+    regexp: "^#?ssl_key = <"
     line: "ssl_key = <{{ dovecot_ssl_key }}"
   notify: reload dovecot
   when: 'dovecot_ssl_key != ""'
