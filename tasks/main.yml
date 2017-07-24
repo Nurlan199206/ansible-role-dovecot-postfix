@@ -102,13 +102,12 @@
   with_items: "{{ postfix_catch_all }}"
   notify: postmap virtual
 - name: "Create .forward"
-  lineinfile:
-    path: "{{ item.forward_path }}"
-    line: "{{ item.forward_content }}"
+  copy:
+    content: "{{ item.forward_content }}"
+    dest: "{{ item.forward_path }}"
     owner: "{{ item.forward_owner }}"
     group: "{{ item.forward_group }}"
     mode: "{{ item.forward_mode }}"
-    create: yes
   with_items: "{{ postfix_catch_all }}"
 
 - name: Allow tcp to dovecot
