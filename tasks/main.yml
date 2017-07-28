@@ -103,7 +103,7 @@
   notify: postmap virtual
 - name: "Create .forward"
   copy:
-    content: "{{ item.forward_content }}"
+    content: "{{ item.forward_content }}\n"
     dest: "{{ item.forward_path }}"
     owner: "{{ item.forward_owner }}"
     group: "{{ item.forward_group }}"
